@@ -1,0 +1,84 @@
+{% extends 'base.html' %}
+
+{% block title %}Add Expense - Student Budget Manager{% endblock %}
+{% block page_title %}Add New Expense{% endblock %}
+{% block page_subtitle %}Track a new expense{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl">
+    <div class="card-dark rounded-lg p-6">
+        <form method="POST" class="space-y-6">
+            {% csrf_token %}
+
+            <!-- Title -->
+            <div>
+                <label class="block text-sm font-medium text-gray-300 mb-2">{{ form.title.label }}</label>
+                {{ form.title }}
+                {% if form.title.errors %}
+                    <p class="text-red-400 text-sm mt-1">{{ form.title.errors.0 }}</p>
+                {% endif %}
+            </div>
+
+            <!-- Amount -->
+            <div>
+                <label class="block text-sm font-medium text-gray-300 mb-2">{{ form.amount.label }}</label>
+                <div class="relative">
+                    <span class="absolute left-4 top-3 text-gray-400">$</span>
+                    {{ form.amount }}
+                </div>
+                {% if form.amount.errors %}
+                    <p class="text-red-400 text-sm mt-1">{{ form.amount.errors.0 }}</p>
+                {% endif %}
+            </div>
+
+            <!-- Category -->
+            <div>
+                <label class="block text-sm font-medium text-gray-300 mb-2">{{ form.category.label }}</label>
+                {{ form.category }}
+                {% if form.category.errors %}
+                    <p class="text-red-400 text-sm mt-1">{{ form.category.errors.0 }}</p>
+                {% endif %}
+            </div>
+
+            <!-- Date -->
+            <div>
+                <label class="block text-sm font-medium text-gray-300 mb-2">{{ form.date.label }}</label>
+                {{ form.date }}
+                {% if form.date.errors %}
+                    <p class="text-red-400 text-sm mt-1">{{ form.date.errors.0 }}</p>
+                {% endif %}
+            </div>
+
+            <!-- Notes -->
+            <div>
+                <label class="block text-sm font-medium text-gray-300 mb-2">{{ form.notes.label }}</label>
+                {{ form.notes }}
+                {% if form.notes.errors %}
+                    <p class="text-red-400 text-sm mt-1">{{ form.notes.errors.0 }}</p>
+                {% endif %}
+            </div>
+
+            <!-- Buttons -->
+            <div class="flex gap-4 pt-4">
+                <button type="submit" class="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white px-8 py-2 rounded-lg font-medium transition-all">
+                    Add Expense
+                </button>
+                <a href="{% url 'expense_list' %}" class="bg-gray-700 hover:bg-gray-600 text-white px-8 py-2 rounded-lg font-medium transition-all">
+                    Cancel
+                </a>
+            </div>
+        </form>
+    </div>
+
+    <!-- Quick Tips -->
+    <div class="mt-6 card-dark rounded-lg p-6">
+        <h4 class="font-bold text-white mb-3">💡 Quick Tips</h4>
+        <ul class="text-sm text-gray-400 space-y-2">
+            <li>✓ Be descriptive with your expense title</li>
+            <li>✓ Select the correct category for better tracking</li>
+            <li>✓ Add notes for reference (optional)</li>
+            <li>✓ Use today's date if you forgot to log it earlier</li>
+        </ul>
+    </div>
+</div>
+{% endblock %}

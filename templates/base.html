@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Student Budget Manager{% endblock %}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+    <style>
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #1a1a1a;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #444;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #666;
+        }
+        body {
+            background-color: #0f0f0f;
+            color: #e5e5e5;
+        }
+        .glass-effect {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .card-dark {
+            background: #1a1a1a;
+            border: 1px solid #333;
+        }
+        .transition-all {
+            transition: all 0.3s ease;
+        }
+    </style>
+    {% block extra_css %}{% endblock %}
+</head>
+<body class="dark">
+    {% if user.is_authenticated %}
+        <div class="flex h-screen">
+            <!-- Sidebar -->
+            <aside class="w-64 card-dark border-r border-gray-700 flex flex-col">
+                <!-- Logo -->
+                <div class="p-6 border-b border-gray-700">
+                    <h1 class="text-2xl font-bold text-blue-500">📊 BudgetHub</h1>
+                    <p class="text-xs text-gray-400 mt-1">Student Budget Manager</p>
+                </div>
+
+                <!-- Navigation -->
+                <nav class="flex-1 p-4 overflow-y-auto">
+                    <ul class="space-y-2">
+                        <li>
+                            <a href="{% url 'dashboard' %}" class="flex items-center px-4 py-3 rounded-lg transition-all {% if 'dashboard' in request.path %}bg-blue-600 text-white{% else %}text-gray-300 hover:bg-gray-800{% endif %}">
+                                <span class="text-lg mr-3">📈</span>
+                                <span>Dashboard</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="{% url 'expense_list' %}" class="flex items-center px-4 py-3 rounded-lg transition-all {% if 'expenses' in request.path and 'add' not in request.path %}bg-blue-600 text-white{% else %}text-gray-300 hover:bg-gray-800{% endif %}">
+                                <span class="text-lg mr-3">💸</span>
+                                <span>Expenses</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="{% url 'budget' %}" class="flex items-center px-4 py-3 rounded-lg transition-all {% if 'budget' in request.path %}bg-blue-600 text-white{% else %}text-gray-300 hover:bg-gray-800{% endif %}">
+                                <span class="text-lg mr-3">💰</span>
+                                <span>Budget</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="{% url 'analytics' %}" class="flex items-center px-4 py-3 rounded-lg transition-all {% if 'analytics' in request.path %}bg-blue-600 text-white{% else %}text-gray-300 hover:bg-gray-800{% endif %}">
+                                <span class="text-lg mr-3">📊</span>
+                                <span>Analytics</span>
+                            </a>
+                        </li>
+                    </ul>
+                </nav>
+
+                <!-- Divider -->
+                <div class="border-t border-gray-700"></div>
+
+                <!-- User Menu -->
+                <div class="p-4">
+                    <div class="flex items-center gap-3 px-4 py-2 rounded-lg card-dark mb-2">
+                        <div class="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-bold">
+                            {{ user.first_name|first|default:user.username|first|upper }}
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <p class="text-sm font-medium truncate">{{ user.get_full_name|default:user.username }}</p>
+                            <p class="text-xs text-gray-400 truncate">{{ user.email }}</p>
+                        </div>
+                    </div>
+                    <div class="space-y-2">
+                        <a href="{% url 'profile' %}" class="block w-full text-left px-4 py-2 text-sm text-gray-300 hover:bg-gray-800 rounded-lg transition-all">
+                            👤 Profile
+                        </a>
+                        <a href="{% url 'logout' %}" class="block w-full text-left px-4 py-2 text-sm text-gray-300 hover:bg-red-900 hover:text-red-200 rounded-lg transition-all">
+                            🚪 Logout
+                        </a>
+                    </div>
+                </div>
+            </aside>
+
+            <!-- Main Content -->
+            <main class="flex-1 flex flex-col overflow-hidden">
+                <!-- Top Bar -->
+                <div class="card-dark border-b border-gray-700 px-6 py-4 flex justify-between items-center">
+                    <div>
+                        <h2 class="text-2xl font-bold text-white">{% block page_title %}Dashboard{% endblock %}</h2>
+                        <p class="text-sm text-gray-400 mt-1">{% block page_subtitle %}Manage your finances{% endblock %}</p>
+                    </div>
+                    <div class="flex items-center gap-4">
+                        <a href="{% url 'add_expense' %}" class="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white px-6 py-2 rounded-lg font-medium transition-all flex items-center gap-2">
+                            <span>➕</span>
+                            <span>Add Expense</span>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Messages -->
+                {% if messages %}
+                    <div class="px-6 pt-4">
+                        {% for message in messages %}
+                            <div class="p-4 rounded-lg mb-2 {% if message.tags %}{{ message.tags }}{% else %}bg-blue-900 text-blue-100{% endif %}" role="alert">
+                                {{ message }}
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+
+                <!-- Page Content -->
+                <div class="flex-1 overflow-y-auto p-6">
+                    {% block content %}{% endblock %}
+                </div>
+            </main>
+        </div>
+
+        <!-- Add Expense Floating Button (Mobile) -->
+        <div class="fixed bottom-6 right-6 md:hidden">
+            <a href="{% url 'add_expense' %}" class="w-14 h-14 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white rounded-full flex items-center justify-center shadow-lg text-2xl transition-transform hover:scale-110">
+                ➕
+            </a>
+        </div>
+    {% else %}
+        <!-- Auth Pages -->
+        <div class="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 flex items-center justify-center px-4">
+            {% block auth_content %}{% endblock %}
+        </div>
+    {% endif %}
+
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

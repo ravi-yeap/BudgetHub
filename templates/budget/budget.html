@@ -1,0 +1,97 @@
+{% extends 'base.html' %}
+
+{% block title %}Budget - Student Budget Manager{% endblock %}
+{% block page_title %}Monthly Budget{% endblock %}
+{% block page_subtitle %}Set and manage your monthly budget{% endblock %}
+
+{% block content %}
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+    <!-- Budget Setting Form -->
+    <div class="md:col-span-2 card-dark rounded-lg p-6">
+        <h3 class="text-lg font-bold text-white mb-6 flex items-center gap-2">
+            <span>💰</span> Set Your Monthly Budget
+        </h3>
+
+        <form method="POST" class="space-y-6">
+            {% csrf_token %}
+
+            <!-- Current Budget -->
+            <div class="bg-gray-800 rounded-lg p-4 mb-6">
+                <p class="text-gray-400 text-sm">Current Monthly Budget</p>
+                <p class="text-3xl font-bold text-blue-400 mt-2">₹{{ student_profile.monthly_budget }}</p>
+            </div>
+
+            <!-- Budget Input -->
+            <div>
+                <label class="block text-sm font-medium text-gray-300 mb-2">{{ form.monthly_budget.label }}</label>
+                {{ form.monthly_budget }}
+                <p class="text-xs text-gray-400 mt-2">{{ form.monthly_budget.help_text }}</p>
+                {% if form.monthly_budget.errors %}
+                    <p class="text-red-400 text-sm mt-2">{{ form.monthly_budget.errors.0 }}</p>
+                {% endif %}
+            </div>
+
+            <!-- Update Button -->
+            <div>
+                <button type="submit" class="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white px-6 py-3 rounded-lg font-medium transition-all">
+                    Update Budget
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Budget Status Card -->
+    <div class="card-dark rounded-lg p-6">
+        <h3 class="text-lg font-bold text-white mb-4">📊 Budget Status</h3>
+        
+        <div class="space-y-4">
+            <!-- Total Expenses -->
+            <div class="bg-gray-800 rounded-lg p-4">
+                <p class="text-gray-400 text-sm">Total Expenses ({{ expense_count }} items)</p>
+                <p class="text-2xl font-bold text-white mt-1">₹{{ total_expenses|floatformat:2 }}</p>
+            </div>
+
+            <!-- Remaining Budget -->
+            <div class="bg-gray-800 rounded-lg p-4">
+                <p class="text-gray-400 text-sm">Remaining Budget</p>
+                <p class="text-2xl font-bold {% if remaining_budget < 0 %}text-red-400{% else %}text-green-400{% endif %} mt-1">
+                    ₹{{ remaining_budget|floatformat:2 }}
+                </p>
+            </div>
+
+            <!-- Budget Progress -->
+            {% if student_profile.monthly_budget > 0 %}
+            <div class="bg-gray-800 rounded-lg p-4">
+                <p class="text-gray-400 text-sm mb-2">Budget Usage: {{ budget_percentage|floatformat:1 }}%</p>
+                <div class="w-full bg-gray-700 rounded-full h-2">
+                    <div class="bg-gradient-to-r {% if status_color == 'red' %}from-red-500 to-red-600{% elif status_color == 'yellow' %}from-yellow-500 to-yellow-600{% else %}from-green-500 to-green-600{% endif %} h-2 rounded-full" style="width: {{ budget_percentage|floatformat:0 }}%"></div>
+                </div>
+            </div>
+
+            <!-- Status -->
+            <div class="bg-gray-800 rounded-lg p-4">
+                <p class="text-gray-400 text-sm">Status</p>
+                <p class="font-bold mt-1 {% if status_color == 'red' %}text-red-400{% elif status_color == 'yellow' %}text-yellow-400{% else %}text-green-400{% endif %}">
+                    {% if status_color == 'red' %}⚠️{% elif status_color == 'yellow' %}⚠️{% else %}✓{% endif %} {{ budget_status }}
+                </p>
+            </div>
+            {% else %}
+            <div class="bg-gray-800 rounded-lg p-4">
+                <p class="text-gray-400 text-sm">Status</p>
+                <p class="font-bold mt-1 text-gray-400">📋 Set a budget to get started</p>
+            </div>
+            {% endif %}
+
+            <!-- Tips -->
+            <div class="bg-gray-800 rounded-lg p-4">
+                <p class="text-gray-400 text-sm font-semibold mb-2">💡 Tips</p>
+                <ul class="text-xs text-gray-400 space-y-1">
+                    <li>• Set realistic budget goals</li>
+                    <li>• Review monthly spending</li>
+                    <li>• Adjust as needed</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

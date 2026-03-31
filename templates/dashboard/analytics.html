@@ -1,0 +1,152 @@
+{% extends 'base.html' %}
+
+{% block title %}Analytics - Student Budget Manager{% endblock %}
+{% block page_title %}Analytics & Reports{% endblock %}
+{% block page_subtitle %}Detailed spending analysis{% endblock %}
+
+{% block content %}
+<!-- Summary Stats -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+    <div class="card-dark rounded-lg p-6">
+        <p class="text-gray-400 text-sm flex items-center gap-2">
+            <span>📈</span> Total Expenses This Month
+        </p>
+        <p class="text-3xl font-bold text-white mt-2">₹{{ total_spent_month }}</p>
+    </div>
+
+    <div class="card-dark rounded-lg p-6">
+        <p class="text-gray-400 text-sm flex items-center gap-2">
+            <span>📝</span> Total Transactions
+        </p>
+        <p class="text-3xl font-bold text-white mt-2">{{ total_expenses }}</p>
+    </div>
+
+    <div class="card-dark rounded-lg p-6">
+        <p class="text-gray-400 text-sm flex items-center gap-2">
+            <span>📊</span> Average Expense
+        </p>
+        {% if total_expenses > 0 %}
+            <p class="text-3xl font-bold text-white mt-2">₹{{ average_expense|floatformat:2 }}</p>
+        {% else %}
+            <p class="text-3xl font-bold text-white mt-2">$0.00</p>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Charts -->
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+    <!-- Monthly Trend Chart -->
+    <div class="card-dark rounded-lg p-6">
+        <h3 class="text-lg font-bold text-white mb-4 flex items-center gap-2">
+            <span>📊</span> 6-Month Trend
+        </h3>
+        <canvas id="monthlyTrendChart" class="max-h-80"></canvas>
+    </div>
+
+    <!-- Category Distribution -->
+    <div class="card-dark rounded-lg p-6">
+        <h3 class="text-lg font-bold text-white mb-4 flex items-center gap-2">
+            <span>🍕</span> Category Distribution
+        </h3>
+        {% if category_stats %}
+            <div class="space-y-4">
+                {% for cat in category_stats %}
+                    <div>
+                        <div class="flex justify-between items-center mb-1">
+                            <span class="text-gray-300">{{ cat.name }}</span>
+                            <span class="text-white font-semibold">₹{{ cat.total }} ({{ cat.percentage|floatformat:1 }}%)</span>
+                        </div>
+                        <div class="w-full bg-gray-700 rounded-full h-2 overflow-hidden">
+                            <div class="bg-gradient-to-r from-blue-600 to-blue-400 h-2 rounded-full" style="width: {{ cat.percentage }}%"></div>
+                        </div>
+                        <p class="text-xs text-gray-400 mt-1">{{ cat.count }} transaction{{ cat.count|pluralize }}</p>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p class="text-gray-400 text-center py-8">No expenses yet</p>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Category Breakdown Table -->
+<div class="card-dark rounded-lg p-6">
+    <h3 class="text-lg font-bold text-white mb-4 flex items-center gap-2">
+        <span>📋</span> Category Breakdown
+    </h3>
+    {% if category_stats %}
+        <div class="overflow-x-auto">
+            <table class="w-full text-sm">
+                <thead class="bg-gray-800 border-b border-gray-700">
+                    <tr>
+                        <th class="px-4 py-3 text-left text-gray-300">Category</th>
+                        <th class="px-4 py-3 text-center text-gray-300">Transactions</th>
+                        <th class="px-4 py-3 text-right text-gray-300">Amount</th>
+                        <th class="px-4 py-3 text-right text-gray-300">Percentage</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for cat in category_stats %}
+                        <tr class="border-b border-gray-700 hover:bg-gray-800 transition-all">
+                            <td class="px-4 py-3 text-white">{{ cat.name }}</td>
+                            <td class="px-4 py-3 text-center text-gray-300">{{ cat.count }}</td>
+                            <td class="px-4 py-3 text-right text-white font-semibold">₹{{ cat.total }}</td>
+                            <td class="px-4 py-3 text-right text-blue-400 font-semibold">{{ cat.percentage|floatformat:1 }}%</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <p class="text-gray-400 text-center py-8">No expense data available</p>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Monthly Trend Chart
+    const monthlyData = {{ monthly_trend|safe }};
+    if (monthlyData.labels.length > 0) {
+        const monthlyCtx = document.getElementById('monthlyTrendChart').getContext('2d');
+        new Chart(monthlyCtx, {
+            type: 'line',
+            data: {
+                labels: monthlyData.labels,
+                datasets: [{
+                    label: 'Monthly Spending',
+                    data: monthlyData.data,
+                    borderColor: 'rgba(59, 130, 246, 1)',
+                    backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                    borderWidth: 3,
+                    fill: true,
+                    tension: 0.4,
+                    pointBackgroundColor: 'rgba(59, 130, 246, 1)',
+                    pointBorderColor: '#1a1a1a',
+                    pointBorderWidth: 2,
+                    pointRadius: 6,
+                    pointHoverRadius: 8,
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: {
+                    legend: { display: false }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        grid: { color: '#333' },
+                        ticks: { color: '#999' }
+                    },
+                    x: {
+                        grid: { display: false },
+                        ticks: { color: '#999' }
+                    }
+                }
+            }
+        });
+    }
+</script>
+{% endblock %}

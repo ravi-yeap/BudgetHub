@@ -1,0 +1,85 @@
+{% extends 'base.html' %}
+
+{% block title %}Login - Student Budget Manager{% endblock %}
+{% block page_title %}Sign In{% endblock %}
+
+<style>
+    input[type="text"], input[type="email"], input[type="password"] {
+        color: #1f2937 !important;
+    }
+</style>
+
+{% block auth_content %}
+<div class="w-full max-w-md">
+    <div class="glass-effect rounded-2xl p-8">
+        <!-- Header -->
+        <div class="text-center mb-8">
+            <h1 class="text-4xl font-bold text-white mb-2">📊 BudgetHub</h1>
+            <p class="text-gray-400">Welcome back</p>
+        </div>
+
+        <!-- Form -->
+        <form method="POST" class="space-y-4">
+            {% csrf_token %}
+
+            <!-- Username/Email -->
+            <div>
+                <label class="block text-sm font-medium text-gray-300 mb-2">Username or Email</label>
+                {{ form.username }}
+                {% if form.username.errors %}
+                    <p class="text-red-400 text-sm mt-1">{{ form.username.errors.0 }}</p>
+                {% endif %}
+            </div>
+
+            <!-- Password -->
+            <div>
+                <label class="block text-sm font-medium text-gray-300 mb-2">Password</label>
+                {{ form.password }}
+                {% if form.password.errors %}
+                    <p class="text-red-400 text-sm mt-1">{{ form.password.errors.0 }}</p>
+                {% endif %}
+            </div>
+
+            <!-- Remember Me -->
+            <div class="flex items-center">
+                {{ form.remember_me }}
+                <label class="text-sm text-gray-300 ml-2">Remember me</label>
+            </div>
+
+            <!-- Submit Button -->
+            <button type="submit" class="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold py-2 rounded-lg transition-all mt-6">
+                Sign In
+            </button>
+        </form>
+
+        <!-- Divider -->
+        <div class="relative my-6">
+            <div class="absolute inset-0 flex items-center">
+                <div class="w-full border-t border-gray-700"></div>
+            </div>
+            <div class="relative flex justify-center text-sm">
+                <span class="px-2 bg-gray-800 text-gray-400">Don't have an account?</span>
+            </div>
+        </div>
+
+        <!-- Sign Up Link -->
+        <a href="{% url 'signup' %}" class="block w-full text-center px-4 py-2 border border-gray-600 rounded-lg text-gray-300 hover:border-gray-400 transition-all">
+            Create Account
+        </a>
+    </div>
+
+    <!-- Demo Credentials (Optional) -->
+    <div class="mt-6 glass-effect rounded-lg p-4">
+        <p class="text-gray-400 text-sm">
+            <strong>Demo Account:</strong><br>
+            Username: demo<br>
+            Password: demo123
+        </p>
+    </div>
+
+    <!-- Footer -->
+    <p class="text-center text-gray-500 text-sm mt-6">
+        Track your expenses and manage your student budget
+    </p>
+</div>
+{% endblock %}
